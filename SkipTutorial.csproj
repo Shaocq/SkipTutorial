@@ -1,0 +1,61 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.1</TargetFramework>
+        <Nullable>disable</Nullable>
+        <LangVersion>latest</LangVersion>
+        <AssemblyName>SkipTutorial</AssemblyName>
+        <RootNamespace>SkipTutorial</RootNamespace>
+        <Version>0.1.0</Version>
+        <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+
+        <!-- Game install path; override with -p:DuckovPath="..." -->
+        <DuckovPath Condition="'$(DuckovPath)' == ''">E:\Steam\steamapps\common\Escape from Duckov</DuckovPath>
+        <SubPath>\Duckov_Data\Managed\</SubPath>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <!-- Game assemblies: compile-time references only -->
+        <Reference Include="$(DuckovPath)$(SubPath)TeamSoda.*">
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="$(DuckovPath)$(SubPath)ItemStatsSystem.dll">
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="$(DuckovPath)$(SubPath)SodaLocalization.dll">
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="$(DuckovPath)$(SubPath)Sirenix.*">
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="$(DuckovPath)$(SubPath)UniTask.dll">
+            <Private>False</Private>
+        </Reference>
+        <!-- SceneReference（关卡跳转要用 SceneLoader.LoadScene 的 SceneReference 重载） -->
+        <Reference Include="$(DuckovPath)$(SubPath)Eflatun.SceneReference.dll">
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="$(DuckovPath)$(SubPath)Unity*">
+            <Private>False</Private>
+        </Reference>
+
+        <!-- 0Harmony from the HarmonyLib prerequisite; compile-time only, NOT bundled -->
+        <Reference Include="lib\0Harmony.dll">
+            <Private>False</Private>
+        </Reference>
+    </ItemGroup>
+
+    <!-- Build a ready-to-install mod folder: bin/Release/Mod/SkipTutorial/ -->
+    <Target Name="PackModFolder" AfterTargets="Build">
+        <ItemGroup>
+            <ModPayload Include="$(TargetPath)" />
+            <ModPayload Include="$(MSBuildProjectDirectory)\info.ini" />
+            <ModPayload Include="$(MSBuildProjectDirectory)\config.ini"
+                        Condition="Exists('$(MSBuildProjectDirectory)\config.ini')" />
+            <ModPayload Include="$(MSBuildProjectDirectory)\preview.png"
+                        Condition="Exists('$(MSBuildProjectDirectory)\preview.png')" />
+        </ItemGroup>
+        <Copy SourceFiles="@(ModPayload)" DestinationFolder="$(OutputPath)Mod\$(AssemblyName)" SkipUnchangedFiles="false" />
+    </Target>
+
+</Project>
